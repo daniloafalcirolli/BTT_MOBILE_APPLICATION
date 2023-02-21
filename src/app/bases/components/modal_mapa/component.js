@@ -1,5 +1,5 @@
 import React from "react";
-import {View, Alert} from "react-native";
+import {View, Alert, PermissionsAndroid} from "react-native";
 import MapView, {Marker} from "react-native-maps"
 import MapViewDirections from "react-native-maps-directions";
 import { getPreciseDistance } from 'geolib';
@@ -21,87 +21,100 @@ import {googlekey} from "../../../../config/key.json";
 //style
 import pageStyle from "../../../../templates/style/pageStyle";
 
-const ModalMapa = function({modalRequest, value, visible, nav}){
+const ModalMapa = function({modalRequest, value, visible}){
 
     const [carregando, setCarregando] = React.useState(false);
     
     const [cp, setCP] = React.useState(null);
 
     React.useEffect(function(){
-        getCurrentLocation();
+        getCP();
     }, [value])
 
-    const getRaio = async function(){
-        let f = await fetch(`${url}/meta/key/raio_distancia`);
-        let r = await f.json();
-        let n = Number(getPreciseDistance(cp,{
-            latitude: Number(value["latitude"]),
-            longitude: Number(value["longitude"])
-        })/1000)
-        if(n > Number(r["metaValue"])){
-            return false;
-        }else{
-            return true;
-        }
-    }
-
-    const getCurrentLocation = async function(){
-        try{
-            Geolocation.getCurrentPosition(
-                position => {
+    const getCP = async function(){
+        Geolocation.getCurrentPosition(
+            async position => {
+                try{
                     setCP({
                         latitude: Number(position["coords"]["latitude"]),
                         longitude: Number(position["coords"]["longitude"])
-                    });
+                    })
+                }catch(err){
+                    Alert.alert("Erro ao pegar a distancia, tente novamente")
+                }
+            },
+            error => {
+                Alert.alert("Problemas ao adquirir sua localização, saia do aplicativo e entre novamente.")
+            },
+            {
+                enableHighAccuracy: true,
+            }
+        )
+    }
+
+    const getCurrentLocation = async function(act){
+        try{
+            await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            Geolocation.getCurrentPosition(
+                async position => {
+                    try{
+                        let f = await fetch(`${url}/meta/key/raio_distancia`);
+                        let r = await f.json();
+                        let n = Number(getPreciseDistance({
+                            latitude: Number(position["coords"]["latitude"]),
+                            longitude: Number(position["coords"]["longitude"])
+                        },{
+                            latitude: Number(value["latitude"]),
+                            longitude: Number(value["longitude"])
+                        })/1000)
+                        if(n > Number(r["metaValue"])){
+                            Alert.alert("Você não está perto o suficiente para finalizar o serviço.");
+                        }else{
+                            act();
+                        }
+                    }catch(err){
+                        Alert.alert("Erro ao pegar a distancia, tente novamente")
+                    }
                 },
                 error => {
-                    setCP({
-                        latitude: 0,
-                        longitude: 0,
-                    });
-                    Alert.alert("Problemas ão adiquirir sua localização, saia do aplicativo e entre novamente.")
+                    Alert.alert("Problemas ao adquirir sua localização, saia do aplicativo e entre novamente.")
                 },
                 {
                     enableHighAccuracy: true,
                 }
             )
         }catch(err){
-            Alert.alert("Problemas ão adiquirir sua localização, saia do aplicativo e entre novamente.")
+            console.err(err)
         }
     }
 
     const cheguei = async function(){
-        await getCurrentLocation();
-        if(await getRaio()){
-            const act = {
-                "400": function(){
-                    Alert.alert("Não foi possivel salvar sua rota, tente novamente");
-                },
-                "202": function(){
-                    Alert.alert("Rota salva retornando para a pagina de serviços");
-                    navigation.navigate("Hub");
-                }
+        const act = {
+            "400": function(){
+                Alert.alert("Não foi possivel salvar sua rota, tente novamente");
+            },
+            "201": function(){
+                Alert.alert("Rota salva retornando para a pagina de serviços");
+                navigation.navigate("Hub");
             }
-
-            const user = JSON.parse(await AsyncStorage.getItem("user"));
-            let body = {
-                cpf_funcionario: user["cpf"],
-                latitude: value["latitude"],
-                longitude: value["longitude"],
-                descricao: 1
-            }
-            let settings = {
-                method: "POST",
-                header: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(body)
-            }
-            let f = await fetch(`${url}/rotas/registrar`, settings);
-            act[f["status"]]();
-        }else{
-            Alert.alert("Não é possivel salvar a rota a essa distancia")
         }
+
+        const user = JSON.parse(await AsyncStorage.getItem("user"));
+        let body = {
+            cpf_funcionario: user["cpf"],
+            latitude: value["latitude"],
+            longitude: value["longitude"],
+            descricao: 1
+        }
+        let settings = {
+            method: "POST",
+            header: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body)
+        }
+        let f = await fetch(`${url}/rotas/registrar`, settings);
+        act[f["status"]]();
     }
 
     return (
@@ -165,7 +178,7 @@ const ModalMapa = function({modalRequest, value, visible, nav}){
                                         alignSelf: "center"
                                     }}
                                     title={"Cheguei!"}
-                                    action={executarCarregando.bind(this, cheguei, setCarregando)}
+                                    action={executarCarregando.bind(this, getCurrentLocation.bind(this, cheguei), setCarregando)}
                                 />
                             </>
                         }

@@ -40,7 +40,7 @@ const ModalCancel = function({visible, id, action, imagens, nav, item, servico})
             },
             "302": function(){
                 Alert.alert("Você ja almoçou hoje.");
-                nav("TabP");
+                nav("Hub");
             },
             "406": function(){
                 Alert.alert("Algo deu errado, clique novamente em finalizar serviço para verificar se seu almoço ja foi computado");
@@ -62,11 +62,7 @@ const ModalCancel = function({visible, id, action, imagens, nav, item, servico})
             longitude: item["cliente"]["longitude"]
         }
         let act2 = {
-            "201": function(){
-                setCodigo("");
-                setObs("");
-                nav("TabP");
-            },
+            "201": confirmarAlmoco,
             "400": function(){
                 Alert.alert("Não foi possivel finalizar o serviço tente novamente");
             }

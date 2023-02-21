@@ -107,7 +107,7 @@ const Login = function({navigation}) {
                 <View
                     style={style["centerPage"]}
                 >
-                    <ChangeStatus 
+                    <ChangeStatus
                         type={type}
                         setType={setType}
                     />

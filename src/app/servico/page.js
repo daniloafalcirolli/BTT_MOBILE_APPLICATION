@@ -21,8 +21,6 @@ const Servico = function({navigation, route}) {
 
     const {id} = route.params;
 
-    const [btnAtivo, setBtnAtivo] = React.useState(false);
-
     const [carregando, setCarregando] = React.useState(false);
 
     const [servico, setServico] = React.useState();
@@ -83,7 +81,7 @@ const Servico = function({navigation, route}) {
     }
 
     const finalizar = async function(){
-        return navigation.navigate("FinalizarServico", {
+        navigation.navigate("FinalizarServico", {
             id_servico: id,
             id_provedor: servico["provedor"]['id'],
             service: servico
@@ -91,13 +89,12 @@ const Servico = function({navigation, route}) {
     }
     
     const cancelWithoutLocal = async function(){
-        setBtnAtivo(true);
         let act = {
             "400" : function(){
                 return Alert.alert("Não foi possivel cancelar, favor tentar novamente.");
             },
             "200": function(){
-                Alert.alert("Serviço qubrado sem ida ao local.")
+                Alert.alert("Serviço quebrado sem ida ao local.")
                 return navigation.navigate("TabP");
             }
         }
@@ -123,7 +120,10 @@ const Servico = function({navigation, route}) {
         }catch(err){
             Alert.alert("Erro ao tentar cancelar, tente novamente.")
         }
-        setBtnAtivo(false);
+    }
+    
+    const nav = function(name, item = {}){
+        navigation.navigate(name, item)
     }
 
     return (
@@ -145,7 +145,7 @@ const Servico = function({navigation, route}) {
                                 action={openModal.bind(this, setModalCancel, modalCancel)}
                                 imagens={servico["provedor"]["imagens"]}
                                 id={servico["id"]}
-                                navigation={navigation.navigate}
+                                nav={nav}
                                 item={servico}
                                 servico={servico}
                             />
@@ -203,8 +203,7 @@ const Servico = function({navigation, route}) {
                             />
                             <Button
                                 title={"Cancelar sem ir ao local"}
-                                active={btnAtivo}
-                                action={executarCarregando.bind(this, cancelWithoutLocal)}
+                                action={executarCarregando.bind(this, cancelWithoutLocal, setCarregando)}
                             />
                         </View>
                     </>
