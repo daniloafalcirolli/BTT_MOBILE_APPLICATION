@@ -59,6 +59,7 @@ const Servico = function({navigation, route}) {
                             latitude: Number(servico["cliente"]["latitude"]),
                             longitude: Number(servico["cliente"]["longitude"])
                         })/1000)
+
                         if(n > Number(r["metaValue"])){
                             Alert.alert("Você não está perto o suficiente para finalizar o serviço.");
                         }else{
@@ -162,8 +163,20 @@ const Servico = function({navigation, route}) {
                                 info={servico["cliente"]["nome"]}
                             />
                             <Line 
+                                label={"Bairro"}
+                                info={servico["cliente"]["bairro"]}
+                            />
+                            <Line 
                                 label={"Endereço"}
                                 info={servico["cliente"]["endereco"]}
+                            />
+                            <Line 
+                                label={"Numero"}
+                                info={servico["cliente"]["numero"]}
+                            />
+                            <Line 
+                                label={"Complemento"}
+                                info={servico["cliente"]["complemento"]}
                             />
                             <Line 
                                 label={"Contrato"}

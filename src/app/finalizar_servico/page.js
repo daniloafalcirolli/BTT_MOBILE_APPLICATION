@@ -14,6 +14,7 @@ import Button from "./components/button/component";
 
 import ModalImagensObrigatorias from "./components/modal_imagens_obrigatorias/component";
 import ModalCamposObrigatorios from "./components/modal_campo_obrigatorios/component";
+import ConfirmarTelefone from "./components/confirmar_telefone/component";
 import ModalMateriaisRA from "./components/modal_materiais_RA/component";
 import CheckBox from "./components/check_box/component";
 
@@ -41,6 +42,7 @@ const FinalizarServico = function({navigation, route}){
     const [materiaisAplicados, setMateriaisAplicados] = React.useState([]);
     const [modalMateriaisRetirados, setModalMateriaisRetirados] = React.useState(false)
     const [materiaisRetirados, setMateriaisRetirados] = React.useState([]);
+    const [modalConfirmarTelefone, setModalConfirmarTelefone] = React.useState(false);
 
     const SetarRota = async function(){
         const user = JSON.parse(await AsyncStorage.getItem("user"));
@@ -53,7 +55,7 @@ const FinalizarServico = function({navigation, route}){
         let act2 = {
             "201": function(){
                 Alert.alert("Serviço finalizado com sucesso");
-                confirmarAlmoco();
+                setModalConfirmarTelefone(true);
             },
             "400": function(){
                 setActive(false);
@@ -270,6 +272,13 @@ const FinalizarServico = function({navigation, route}){
                     <View
                         style={style["containerButtons"]}
                     >
+                        <ConfirmarTelefone
+                            modalRequest={modalRequest.bind(this, setModalConfirmarTelefone, modalConfirmarTelefone)}
+                            visible={modalConfirmarTelefone}
+                            label={"Confirmar\nTelefone\ndo Cliente"}
+                            service={service}
+                            actionAfterConfirm={confirmarAlmoco}
+                        />
                         <ModalMateriaisRA
                             modalRequest={modalRequest.bind(this, setModalMateriaisRetirados, modalMateriaisRetirados)}
                             visible={modalMateriaisRetirados}

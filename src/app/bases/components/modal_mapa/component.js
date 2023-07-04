@@ -93,9 +93,9 @@ const ModalMapa = function({modalRequest, value, visible}){
             "400": function(){
                 Alert.alert("Não foi possivel salvar sua rota, tente novamente");
             },
-            "201": function(){
+            "201": async function(){
                 Alert.alert("Rota salva retornando para a pagina de serviços");
-                navigation.navigate("Hub");
+                await navigation.navigate("Hub");
             }
         }
 

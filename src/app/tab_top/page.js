@@ -54,7 +54,7 @@ const TabP = function({navigation}){
                             component={e["component"]}
                             name={e["name"]}
                             options={{
-                                tabBarLabel: e["name"],
+                                tabBarLabel: e["nome"],
                                 tabBarLabelStyle:{ 
                                     fontWeight: "bold",
                                     fontSize:10

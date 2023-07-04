@@ -54,8 +54,7 @@ const StackN = function() {
         <SafeAreaView
             style={{flex: 1}}
         >
-            <StatusBar 
-                
+            <StatusBar
             />
             <NavigationContainer>
                 <Stack.Navigator

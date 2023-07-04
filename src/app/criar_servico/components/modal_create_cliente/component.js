@@ -28,6 +28,10 @@ const ModalCreateCliente = function({value, visible, action}){
     const [endereco, setEndereco] = React.useState({})
     const [contrato, setContrato] = React.useState("");
     const [nome, setNome] = React.useState("");
+    const [telefone1, setTelefone1] = React.useState("");
+    const [telefone2, setTelefone2] = React.useState("");
+    const [complemento, setComplemento] = React.useState("");
+    const [numero, setNumero] = React.useState("")
 
     //Cpf ou cnpj selecionado
     const [state, setState] = React.useState({
@@ -55,12 +59,23 @@ const ModalCreateCliente = function({value, visible, action}){
         }
     }, [cpfcnpj])
 
+    const remover_logradouro = function(i){
+        let array = i.split(" ")
+        let finalName = "";
+        for(let n = 1;n<array.length;n++) {
+            finalName += `${array[n]} `
+        }
+        return finalName.substring(0, finalName.length-1);
+    }
+
     const CriarCliente = async function(){
         if(
             nome == "" || nome == undefined ||
             endereco == "" || endereco == undefined ||
             JSON.stringify(contrato) == "{}" || contrato == undefined ||
-            cpfcnpj == "" || cpfcnpj == undefined
+            cpfcnpj == "" || cpfcnpj == undefined ||
+            numero == "" || numero == undefined ||
+            telefone1 == "" || telefone1 == undefined
         ){
             return Alert.alert("Algum campo não está preenchido");
         }
@@ -70,7 +85,11 @@ const ModalCreateCliente = function({value, visible, action}){
                 setContrato("");
                 setCpfCnpj("");
                 setEndereco({});
-                setNome("")
+                setNome("");
+                setTelefone1("");
+                setTelefone2("");
+                setComplemento("");
+                setNumero("");
                 let r = await f.json();
                 value(r);
                 action();
@@ -81,14 +100,21 @@ const ModalCreateCliente = function({value, visible, action}){
         }
 
         let body = {
-            nome: nome.toUpperCase(),
-            contrato: contrato,
-            endereco: endereco["endereco"].toUpperCase(),
-            latitude: endereco["coord"]["lat"] + "",
-            longitude: endereco["coord"]["lng"] + ""
+            "nome": nome.toUpperCase(),
+            "contrato": contrato,
+            "latitude": endereco["coord"]["lat"] + "",
+            "longitude": endereco["coord"]["lng"] + "",
+            "estado":endereco["estado"],
+            "cidade":endereco["cidade"],
+            "logradouro":endereco["endereco"].split(" ")[0],
+            "bairro":endereco["bairro"],
+            "endereco":remover_logradouro(endereco["endereco"]),
+            "numero":numero,
+            "complemento":complemento,
+            "telefone":telefone1,
+            "telefone2":telefone2,
         }
         body[state["json"]] = cpfcnpj;
-
         let settings = {
             method: "POST",
             headers: {
@@ -116,6 +142,9 @@ const ModalCreateCliente = function({value, visible, action}){
                 let r = await f.json();
                 value(r);
                 setCpfCnpj("");
+                setComplemento("");
+                setTelefone1("");
+                setTelefone2("");
                 action();
             },
             "404": () => {
@@ -161,10 +190,13 @@ const ModalCreateCliente = function({value, visible, action}){
                             </Text>
                             <GooglePlacesAutocomplete
                                 onPress={(data, details = null) => {
-                                    setEndereco({
-                                        endereco: details.name,
-                                        coord: details.geometry.location
+                                    let data_set = ["endereco", "bairro", "cidade", "estado", "cep"];
+                                    let json = {};
+                                    details.address_components.forEach((e,index)=>{
+                                        json[data_set[index]] = e["long_name"];
                                     })
+                                    json["coord"] = details.geometry.location;
+                                    setEndereco(json);
                                 }}
                                 styles={{
                                     container: {
@@ -191,8 +223,24 @@ const ModalCreateCliente = function({value, visible, action}){
                             />
                         </View>
                         <Input
+                            label={"Numero"}
+                            value={[setNumero, numero]}
+                        />
+                        <Input
+                            label={"Complemento"}
+                            value={[setComplemento, complemento]}
+                        />
+                        <Input
                             label={"Nome"}
                             value={[setNome, nome]}
+                        />
+                        <Input
+                            label={"Telefone 1"}
+                            value={[setTelefone1, telefone1]}
+                        />
+                        <Input
+                            label={"Telefone 2"}
+                            value={[setTelefone2, telefone2]}
                         />
                         <Input
                             label={"Contrato"}

@@ -24,8 +24,6 @@ const CriarServicos = function() {
 
     const [carregando, setCarregando] = React.useState(false);
 
-    const [active, setActive] = React.useState(false);
-
     const openModal = function(setItem, item){
         setItem(!item)
     }
@@ -53,15 +51,12 @@ const CriarServicos = function() {
     const [protocolo, setProtocolo] = React.useState("");
 
     const handleFinish = async function(){
-        setActive(true);
-        
         if(
             JSON.stringify(ModalClienteValue) == "{}" ||
             JSON.stringify(ModalProvedorValue) == "{}" ||
             JSON.stringify(ModalProvedorServicosValue) == "{}" ||
             protocolo == ""
         ){
-            setActive(false);
             return Alert.alert("Algum campo não está selecionado, revise-o e tente novamente");
         }
 
@@ -77,7 +72,6 @@ const CriarServicos = function() {
 
         let act = {
             "201": function(){
-                setActive(false);
                 setModalClienteValue({});
                 setModalProvedorValue({});
                 setModalProvedorServicosValue({});
@@ -85,11 +79,9 @@ const CriarServicos = function() {
                 return Alert.alert("Serviço criado com sucesso!");
             },
             "401": function(){
-                setActive(false);
                 return Alert.alert("Você não tem autorização para criar um serviço, vá a central e fale com seu superior.");
             },
             "412": function(){
-                setActive(false);
                 return Alert.alert("Algum campo não estra preenchido, revise-o e tente novamente.");
             },
         }
@@ -105,7 +97,6 @@ const CriarServicos = function() {
             let f = await fetch(`${url}/servico/create`, settings);
             act[f["status"]]();
         }catch(err){
-            setActive(false);
             return Alert.alert("Algo deu errado tente novamente mais tarde...")
         }
     }
